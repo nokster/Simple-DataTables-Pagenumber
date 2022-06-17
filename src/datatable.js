@@ -296,9 +296,13 @@ export class DataTable {
         template = template.replace(/\{pager\}/g, paginatorWrapper.outerHTML)
         this.wrapper.innerHTML = template
 
+        
+
         this.container = this.wrapper.querySelector(".dataTable-container")
 
         this.pagers = this.wrapper.querySelectorAll(".dataTable-pagination-list")
+
+        
 
         this.label = this.wrapper.querySelector(".dataTable-info")
 
@@ -376,10 +380,16 @@ export class DataTable {
             const index = this.currentPage - 1
 
             const frag = document.createDocumentFragment()
-            this.pages[index].forEach(row => frag.appendChild(this.rows().render(row)))
+            // this.pages[index].forEach(row => frag.appendChild(this.rows().render(row)))
 
+            if (index > this.pages.length - 1) {
+                //do nothing
+            }else{
+                this.pages[index].forEach(row => 
+                    frag.appendChild(this.rows().render(row))
+                )
+            }
             this.clear(frag)
-
             this.onFirstPage = this.currentPage === 1
             this.onLastPage = this.currentPage === this.lastPage
         } else {
@@ -394,9 +404,19 @@ export class DataTable {
         let items
 
         if (this.totalPages) {
+            //added
+            let totalCurrentPage = 0
             current = this.currentPage - 1
             f = current * this.options.perPage
-            t = f + this.pages[current].length
+            if(this.options.totalActiveRows > 0){
+                 totalCurrentPage = f + this.options.perPage
+                if(totalCurrentPage > this.options.totalActiveRows){
+                    totalCurrentPage = this.options.totalActiveRows
+                }
+                t = totalCurrentPage
+            }else{
+                t = f + this.pages[current].length
+            }
             f = f + 1
             items = this.searching ? this.searchData.length : this.data.length
         }
@@ -453,16 +473,25 @@ export class DataTable {
                     this.options.ellipsisText
                 )
             }
-
             // active page link
             this.links[this.currentPage - 1].classList.add("active")
+            var copyClassList = []
+            var totalShow = 0;
 
             // append the links
             pager.forEach(p => {
                 p.classList.remove("active")
                 frag.appendChild(p)
+                copyClassList = p
+                totalShow++
             })
 
+            if (totalShow < this.totalPages) {
+                var classAppend=""
+                for (var i = totalShow+1; i < this.totalPages+1; i++) {
+                    frag.appendChild(button(classAppend,  i, i))
+                }
+            }
             this.links[this.currentPage - 1].classList.add("active")
 
             // next button
@@ -475,7 +504,7 @@ export class DataTable {
                 frag.appendChild(button(c, this.totalPages, this.options.lastText))
             }
 
-            // We may have more than one pager
+            // // We may have more than one pager
             this.pagers.forEach(pager => {
                 pager.appendChild(frag.cloneNode(true))
             })
@@ -698,7 +727,8 @@ export class DataTable {
 
         this.links = []
 
-        let i = this.pages.length
+        let i = this.totalPages
+        // let i = this.pages.length
         while (i--) {
             const num = i + 1
             this.links[i] = button(i === 0 ? "active" : "", num, num)
@@ -718,6 +748,42 @@ export class DataTable {
      * @return {Number}
      */
     paginate() {
+        const perPage = this.options.perPage
+        let rows = this.activeRows
+        if (this.options.totalActiveRows > 1) {
+            let rowsTotal = this.options.totalActiveRows
+            this.totalPages = Math.ceil(rowsTotal / perPage)
+            // this.totalPages =((rowsTotal % perPage) === 0 ? rowsTotal  : null);
+            this.lastPage = this.totalPages 
+
+            if (this.options.paging) {
+                // Check for hidden columns
+                this.pages = rows
+                    .map((tr, i) => i % perPage === 0 ? rows.slice(i, i + perPage) : null)
+                    .filter(page => page)
+            } else {
+                this.pages = [rows]
+            }
+
+        }else{
+            if (this.searching) {
+                rows = []
+                this.searchData.forEach(index => rows.push(this.activeRows[index]))
+            }
+            if (this.options.paging) {
+                // Check for hidden columns
+                this.pages = rows
+                    .map((tr, i) => i % perPage === 0 ? rows.slice(i, i + perPage) : null)
+                    .filter(page => page)
+            } else {
+                this.pages = [rows]
+            }
+            this.totalPages = this.lastPage = this.pages.length
+        }
+        return this.totalPages
+    }
+
+    paginateOld() {
         const perPage = this.options.perPage
         let rows = this.activeRows
 
@@ -952,7 +1018,8 @@ export class DataTable {
             this.currentPage = parseInt(page, 10)
         }
 
-        if (page > this.pages.length || page < 0) {
+        if (page > this.totalPages || page < 0) {
+        // if (page > this.pages.length || page < 0) {
             return false
         }
 
