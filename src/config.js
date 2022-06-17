@@ -2,13 +2,16 @@
  * Default configuration
  * @typ {Object}
  */
-export const defaultConfig = {
+ export const defaultConfig = {
     sortable: true,
     searchable: true,
 
     // Pagination
     paging: true,
     perPage: 10,
+    //added
+    totalActiveRows : 1,
+    //end added
     perPageSelect: [5, 10, 15, 20, 25],
     nextPrev: true,
     firstLast: false,
