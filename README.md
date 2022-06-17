@@ -1,5 +1,4 @@
-# Simple-DataTables-Pagenumber
-Forked form Simple-DataTables
+# Simple-DataTables
 
 A lightweight, extendable, dependency-free javascript HTML table plugin. Similar to jQuery DataTables **for use in modern browsers**, but without the jQuery dependency. Note: If you want a version that works in very old browsers (IE, etc.), then head over to https://github.com/fiduswriter/Simple-DataTables-classic .
 
@@ -47,11 +46,11 @@ LGPL
 
 ## npm
 ```
-npm install simple-datatables-pagenumber --save
+npm install simple-datatables --save
 ```
 ## Yarn
 ```
-yarn add simple-datatables-pagenumber
+yarn add simple-datatables
 ```
 
 ---
@@ -61,7 +60,7 @@ yarn add simple-datatables-pagenumber
 Then just initialise the plugin by import DataTable and either passing a reference to the table or a CSS3 selector string as the first parameter:
 
 ```javascript
-import {DataTable} from "simple-datatables-pagenumber"
+import {DataTable} from "simple-datatables"
 
 const myTable = document.querySelector("#myTable");
 const dataTable = new DataTable(myTable);
